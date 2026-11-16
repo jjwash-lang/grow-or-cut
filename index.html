@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1410">
+<meta name="description" content="Grow or Cut: a quick 2 to 8 player game about a shared forest. Stack trees for income, or cut them down for a payday.">
+<meta property="og:title" content="Grow or Cut">
+<meta property="og:description" content="A quick 2 to 8 player game about a shared forest.">
+<title>Grow or Cut</title>
+<script>window.FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC87my2mJ73otwThOjRX4WzAXqSA83g0N8",
+  authDomain: "grow-and-cut.firebaseapp.com",
+  databaseURL: "https://grow-and-cut-default-rtdb.firebaseio.com",
+  projectId: "grow-and-cut",
+  storageBucket: "grow-and-cut.firebasestorage.app",
+  messagingSenderId: "146600205210",
+  appId: "1:146600205210:web:5cdabcf5a96e8822ec3823"
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Inter:wght@400;500&family=Newsreader:ital@1&display=swap" rel="stylesheet">
+<style>
+:root{--f-xl:36px;--f-m:16px;--f-s:14px;--f-xs:12px;--night:#0b1410;--ink:#eef2ee;--mute:#93a097;--gold:#e6b65c;--me:#e6b65c;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{background:var(--night);color:var(--ink);font:400 var(--f-m)/1.45 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:
+ radial-gradient(1px 1px at 12% 18%,#fff8 50%,transparent 51%),radial-gradient(1px 1px at 78% 12%,#fff6 50%,transparent 51%),
+ radial-gradient(1.4px 1.4px at 64% 30%,#fff7 50%,transparent 51%),radial-gradient(1px 1px at 30% 8%,#fff5 50%,transparent 51%),
+ radial-gradient(1px 1px at 90% 44%,#fff5 50%,transparent 51%),radial-gradient(1.2px 1.2px at 6% 52%,#fff6 50%,transparent 51%),
+ radial-gradient(1px 1px at 44% 22%,#fff4 50%,transparent 51%),radial-gradient(120% 70% at 50% 40%,#17281e 0%,transparent 65%)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+[hidden]{display:none!important}
+.scr{position:relative;min-height:100dvh;max-width:560px;margin:0 auto;padding:18px 16px calc(22px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
+h1{font:700 clamp(42px,12vw,60px)/1 "Inter Tight",sans-serif;letter-spacing:-.04em;margin:0;text-align:center}
+h1 em{font:italic 400 1.05em Newsreader,Georgia,serif;letter-spacing:-.01em}
+.tag{margin:8px 0 0;text-align:center;color:var(--mute);font-size:var(--f-m)}
+.tag em{font:italic 400 1.15em Newsreader,Georgia,serif;color:var(--ink)}
+.hero{flex:1;display:flex;align-items:center;justify-content:center;min-height:250px}
+.hero svg{width:min(96%,440px);height:auto;overflow:visible}
+.how{list-style:none;margin:20px 0 20px;padding:0;display:flex;flex-direction:column;gap:10px}
+.how li{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:center;font:500 var(--f-m)/1.35 "Inter Tight",sans-serif;color:#d6ded8}
+.how svg{width:40px;height:40px}
+input{width:100%;font:500 var(--f-m) Inter,sans-serif;color:var(--ink);background:#ffffff0d;border:1px solid #ffffff1a;border-radius:14px;padding:14px 16px;outline:none;text-align:center}
+input:focus{border-color:var(--gold)}
+input::placeholder{color:#ffffff55}
+.btns{display:flex;gap:10px;margin-top:12px}
+.pri,.sec{flex:1;padding:15px 18px;border-radius:14px;font:600 var(--f-m) "Inter Tight",sans-serif;letter-spacing:-.01em;transition:transform .15s,opacity .2s}
+.pri{background:var(--gold);color:#1a1408}
+.sec{background:#ffffff12}
+.pri:active,.sec:active{transform:scale(.97)}
+.pri:disabled{opacity:.35;cursor:default}
+button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.conn{display:flex;align-items:center;justify-content:center;gap:8px;margin:14px 0 0;color:var(--mute);font-size:var(--f-s);text-align:center}
+.conn i{width:7px;height:7px;border-radius:50%;background:#ffffff40;flex:none}
+.conn i.on{background:#8fc186;box-shadow:0 0 8px #8fc186}
+#s-lobby{justify-content:center}
+#s-lobby h2{font:700 var(--f-xl) "Inter Tight",sans-serif;letter-spacing:-.03em;margin:0 0 18px;text-align:center}
+#lobbyList{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+#lobbyList li{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:#ffffff0a;font:500 var(--f-m) "Inter Tight"}
+#lobbyList li .t{margin-left:auto;font-size:var(--f-xs);color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
+.av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:700 var(--f-xs) "Inter Tight";color:#0b1410;flex:none}
+#lobbyTag{color:var(--mute);text-align:center;margin:18px 0 6px}
+.ghost{display:block;margin:14px auto 0;color:var(--mute);font-size:var(--f-s);padding:8px 14px}
+/* game */
+#s-game{padding-top:12px}
+.chips{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;min-height:32px;padding:0 38px}
+.chip{display:flex;align-items:center;gap:6px;padding:3px 10px 3px 3px;border-radius:99px;font:600 var(--f-s) "Inter Tight";transition:opacity .3s,background .3s;font-variant-numeric:tabular-nums}
+.chip.me{background:#ffffff12}
+.chip i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:700 var(--f-xs) "Inter Tight";color:#0b1410;font-style:normal;position:relative}
+.chip.wait{opacity:.45}
+.chip.in i::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1.5px solid var(--c);opacity:.85}
+.chip .plus{font-size:var(--f-xs);color:#a9d6a0;margin-left:-2px}
+.meta{display:flex;justify-content:center;flex-wrap:wrap;margin-top:8px;font:500 var(--f-s) Inter,sans-serif;color:var(--mute);font-variant-numeric:tabular-nums}
+.meta span+span::before{content:"·";margin:0 7px;color:#ffffff33}
+.meta .hp{color:inherit}
+.meta .hp.low{color:#f0a070}
+.tbar{height:1px;margin:8px auto 0;width:120px;background:#ffffff10;border-radius:2px;overflow:hidden}
+.tbar i{display:block;height:100%;width:100%;background:var(--me);transition:width .5s linear}
+.stage{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+.stage svg{width:100%;max-height:min(58vh,560px);overflow:visible;touch-action:manipulation}
+.line{text-align:center;margin:0 0 12px;font:500 var(--f-m) "Inter Tight",sans-serif;color:#d6ded8;min-height:22px}
+.hand{display:flex;justify-content:center;gap:10px}
+.card{flex:0 1 25%;max-width:108px;aspect-ratio:3/4;border-radius:16px;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#1d2c23,#121b15);box-shadow:inset 0 0 0 1px #ffffff10,0 10px 24px -12px #000;transition:transform .22s cubic-bezier(.2,.9,.3,1.2),box-shadow .2s,opacity .3s}
+.card svg{width:84%;height:auto}
+.card.sp,.card.rare{box-shadow:inset 0 0 0 1px #e6b65c70,0 10px 24px -12px #000}
+.card{transform:translateY(var(--dy,0)) rotate(var(--rot,0))}
+.card[aria-pressed=true]{transform:translateY(-14px) rotate(0);box-shadow:inset 0 0 0 1.5px var(--me),0 0 30px -6px var(--me),0 16px 30px -12px #000}
+.card:disabled{opacity:.3;cursor:default}
+.hand.deal .card{animation:deal .5s cubic-bezier(.2,.9,.3,1.2) both}
+.hand.deal .card:nth-child(2){animation-delay:.07s}.hand.deal .card:nth-child(3){animation-delay:.14s}.hand.deal .card:nth-child(4){animation-delay:.21s}
+@keyframes deal{from{transform:translateY(60px) rotate(6deg);opacity:0}}
+.quit{position:absolute;top:10px;left:8px;width:36px;height:36px;border-radius:50%;color:var(--mute);font-size:22px;line-height:1}
+.over{text-align:center;animation:up .5s ease both}
+@keyframes up{from{opacity:0;transform:translateY(16px)}}
+.over .big{font:700 var(--f-xl)/1.05 "Inter Tight",sans-serif;letter-spacing:-.035em;margin:0;text-wrap:balance}
+.over .sub{color:#c3ccc5;margin:8px 0 6px}
+/* board fx */
+.isle{animation:float 7s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-5px)}}
+.cell{cursor:default}
+.open{cursor:pointer}
+.hl{animation:breathe 1.8s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.35}50%{opacity:.9}}
+.nt{transform-box:fill-box;transform-origin:50% 100%;animation:nt .5s cubic-bezier(.2,.9,.3,1.3) both}
+@keyframes nt{0%{transform:translateY(-26px) scale(.5);opacity:0}60%{transform:translateY(2px) scale(1.05,.95);opacity:1}80%{transform:translateY(-1px) scale(.99,1.01)}100%{transform:none}}
+.pop{transform-box:fill-box;transform-origin:50% 100%;animation:pop .6s cubic-bezier(.2,.9,.3,1.4) both}
+@keyframes pop{from{transform:scale(.2);opacity:0}}
+.swing{transform-box:fill-box;transform-origin:20% 90%;animation:swing .45s ease-in-out 2}
+@keyframes swing{50%{transform:rotate(-38deg)}}
+.lab{animation:lab 1.6s ease-out both}
+@keyframes lab{from{transform:translateY(10px);opacity:0}20%{transform:none;opacity:1}80%{opacity:1}to{transform:translateY(-16px);opacity:0}}
+.ghost-t{opacity:.5}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important}}
+@media (min-width:900px){.scr{max-width:620px}}
+#skyA,#skyB{position:fixed;inset:0;z-index:-2;transition:opacity 2.4s ease;pointer-events:none}
+body::before{z-index:-1;opacity:var(--stars,1);transition:opacity 2s}
+.meta .fin{color:var(--gold)}
+.chip .plus.rate{color:var(--mute);font-weight:500}
+.chip .plus.gain{color:#a9d6a0;animation:lab 2.2s ease-out both}
+.card.rare[aria-pressed=true],.card.sp[aria-pressed=true]{box-shadow:inset 0 0 0 1.5px var(--me),0 0 30px -6px var(--me),0 16px 30px -12px #000}
+.over .story{color:#d6ded8;font:italic 400 var(--f-m)/1.4 Newsreader,Georgia,serif;margin:0 auto 6px;max-width:34ch}
+.tree{transform-box:fill-box;transform-origin:50% 100%;animation:sway 5s ease-in-out infinite;transition:opacity .25s}
+@keyframes sway{0%,100%{transform:rotate(-.9deg)}50%{transform:rotate(.9deg)}}
+.tree.faded{opacity:.22}
+.fallR,.fallL{transform-box:view-box;animation:fallR 1.1s cubic-bezier(.55,0,.85,.45) both}
+.fallL{animation-name:fallL}
+@keyframes fallR{0%{transform:rotate(0)}12%{transform:rotate(-3deg)}85%{opacity:1}100%{transform:rotate(84deg);opacity:0}}
+@keyframes fallL{0%{transform:rotate(0)}12%{transform:rotate(3deg)}85%{opacity:1}100%{transform:rotate(-84deg);opacity:0}}
+.chip-p{transform-box:fill-box;animation:chipp .9s cubic-bezier(.2,.7,.4,1) forwards}
+@keyframes chipp{from{transform:translate(0,0);opacity:1}to{transform:translate(var(--dx),calc(var(--dy) + 30px));opacity:0}}
+svg.shake{animation:shake .45s ease}
+@keyframes shake{20%{transform:translate(-3px,1px)}40%{transform:translate(3px,-1px)}60%{transform:translate(-2px,1px)}80%{transform:translate(1px,0)}}
+.pulse{animation:pulse .5s ease-in-out 3}
+@keyframes pulse{50%{stroke-width:5px}}
+body.danger .isle{filter:saturate(.75) brightness(.9)}
+.isle{transition:filter 1.5s}
+#board{transition:transform 3.2s cubic-bezier(.3,.1,.2,1)}
+#board.rise{animation:rise 1.5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{transform:translateY(60px) scale(.94);opacity:0}}
+#board.pullback{transform:scale(.86) translateY(-4%)}
+.chips.many{gap:4px}
+.chips.many .chip{font-size:var(--f-xs);padding:2px 8px 2px 3px;gap:7px}
+.chips.many .chip i{width:20px;height:20px;font-size:10px}
+.chip i.dash{outline:1.5px dashed var(--c);outline-offset:1.5px}
+.chip i.dot{outline:2px dotted var(--c);outline-offset:1.5px}
+.evp.now{color:var(--gold)}
+.banner{animation:banner 2.2s cubic-bezier(.2,.8,.3,1) both}
+@keyframes banner{0%{transform:translateX(-120%);opacity:0}25%{transform:none;opacity:1}80%{opacity:1}100%{opacity:0}}
+.clatter{transform-box:fill-box;transform-origin:50% 50%;animation:clatter .9s ease-in .5s both}
+@keyframes clatter{to{transform:translate(6px,30px) rotate(80deg);opacity:0}}
+
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+  <filter id="gl2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.5"/></filter>
+  <filter id="cs" x="-50%" y="-100%" width="200%" height="300%"><feGaussianBlur stdDeviation="1.6"/></filter>
+</defs></svg>
+
+<div id="skyA"></div><div id="skyB"></div>
+<section class="scr" id="s-join">
+  <div class="hero"><svg id="hero" aria-hidden="true"></svg></div>
+  <h1>Grow <em>or</em> cut</h1>
+  <p class="tag">an <em>Overstory</em> game</p>
+  <ul class="how" id="how"></ul>
+  <input id="name" placeholder="Your name" maxlength="16" autocomplete="off">
+  <input id="code" placeholder="Room code (leave empty to start a table)" maxlength="4" autocomplete="off" autocapitalize="characters" hidden style="margin-top:8px;text-transform:uppercase">
+  <div class="btns"><button class="pri" id="joinBtn" disabled>Join the table</button><button class="sec" id="soloBtn">Practice</button></div>
+  <p class="conn"><i id="connDot"></i><span id="connText">Connecting…</span></p>
+</section>
+
+<section class="scr" id="s-lobby" hidden>
+  <h2 id="lobbyH">The table</h2>
+  <button class="ghost" id="copyLink" hidden style="margin:-8px auto 14px">Copy invite link</button>
+  <ul id="lobbyList"></ul>
+  <p id="lobbyTag"></p>
+  <button class="pri" id="hostBtn">Host this game</button>
+  <button class="pri" id="startBtn">Deal</button>
+  <button class="ghost" id="leaveBtn">Leave</button>
+</section>
+
+<section class="scr" id="s-game" hidden>
+  <button class="quit" id="quitBtn" aria-label="Leave game">×</button>
+  <div class="chips" id="chips"></div>
+  <div class="meta"><span id="round"></span><span class="hp" id="hp"></span><span class="evp" id="ev" hidden></span></div>
+  <div class="tbar"><i id="tfill"></i></div>
+  <div class="stage"><svg id="board" aria-label="Island"></svg></div>
+  <p class="line" id="line"></p>
+  <div class="hand" id="hand"></div>
+  <div class="over" id="over" hidden>
+    <p class="big" id="overBig"></p>
+    <p class="story" id="overStory"></p>
+    <p class="sub" id="overSub"></p>
+    <div class="btns"><button class="pri" id="againBtn">Play again</button><button class="sec" id="exitBtn">Exit</button></div>
+  </div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+  var FAST = /[?&]fast/.test(location.search) || location.protocol === 'file:';
+  var SPEED = FAST ? 0.25 : 1;
+  var PICK_MS = 0, ALLIN_MS = 700 * SPEED;
+  /* Every balance number lives here. */
+  var RULES = { cutPays: 2, boomPays: 3, maxTiers: 9, oldGrowthAt: 6, barnBonus: 2, maxPlayers: 8, pickSeconds: 30 };
+  var CUTX = RULES.cutPays, ROUNDS = 10, CAP = RULES.maxTiers, MINTREES = 3, NPL = 3, MAXP = RULES.maxPlayers;
+  PICK_MS = RULES.pickSeconds * 1000 * SPEED;
+  function useState(st) { if (!st) return; NPL = st.pl.length; ROUNDS = st.R || 10; MINTREES = st.m || 3; }
+  function settingsFor(n) { return { R: n >= 5 ? 8 : 10, m: n <= 6 ? 3 : 4 }; }
+  var COLORS = ['#e6b65c', '#e8875f', '#8ec3e0', '#b49be0', '#f48fb1', '#f1ead8', '#5b7cfa', '#c8e04a'];
+  var DASH = ['', '', '', '', '5 3.2', '5 3.2', '.1 4.2', '.1 4.2'];
+  var BOTS = [{ n: 'Mimi', grow: 1.3, cut: .8 }, { n: 'Neelay', grow: .9, cut: 1.35 }];
+
+  function $(id) { return document.getElementById(id); }
+  function rnd(n) { return Math.floor(Math.random() * n); }
+  function clean(s) { return String(s || '').replace(/[\u0000-\u001f\u007f-\u009f​-‏‪-‮⁠-⁤﻿]/g, '').trim().slice(0, 16); }
+  function initial(n) { n = (n || '?').trim(); return (n[0] || '?').toUpperCase(); }
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  function show(id) { ['s-join', 's-lobby', 's-game'].forEach(function (s) { $(s).hidden = s !== id; }); }
+  function shade(h, a) { var n = parseInt(h.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255, f = a < 0 ? 0 : 255, t = Math.abs(a); r = Math.round(r + (f - r) * t); g = Math.round(g + (f - g) * t); b = Math.round(b + (f - b) * t); return '#' + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1); }
+  function mix(a, b, t) { var x = parseInt(a.slice(1), 16), y = parseInt(b.slice(1), 16); var r = Math.round((x >> 16) * (1 - t) + (y >> 16) * t), g = Math.round((x >> 8 & 255) * (1 - t) + (y >> 8 & 255) * t), bl = Math.round((x & 255) * (1 - t) + (y & 255) * t); return '#' + ((1 << 24) | (r << 16) | (g << 8) | bl).toString(16).slice(1); }
+  function clone(x) { return JSON.parse(JSON.stringify(x)); }
+
+  /* ---------- hex island: 19 tiles, axial coords ---------- */
+  var HEX = []; (function () { for (var r = -2; r <= 2; r++) for (var q = -2; q <= 2; q++) if (Math.abs(q + r) <= 2) HEX.push([q, r]); })();
+  var NC = HEX.length;
+  var NB = HEX.map(function (h) { var o = []; [[1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, 1]].forEach(function (d) { for (var j = 0; j < NC; j++) if (HEX[j][0] === h[0] + d[0] && HEX[j][1] === h[1] + d[1]) o.push(j); }); return o; });
+
+  /* ---------- rules ---------- */
+  var isTree = function (v) { return Array.isArray(v) && v.length > 0; };
+  function kind(c) { return c ? c[0] : null; }     // t tree, a axe, g grove, c clearcut, i injunction, f graft
+  function power(c) { return +c[1] || 0; }
+  function drawCard(r, hand) {
+    var hasTree = hand && hand.some(function (c) { return c && c[0] === 't'; });
+    if (r <= 1 || (hand && !hasTree && Math.random() < .7)) return 't' + (1 + rnd(3));
+    if (r >= 2) { var y = Math.random(), pi = Math.min(1 / 8, 1 / (3 * NPL)), pf = Math.min(1 / 16, 1 / (4 * NPL)); if (y < pi) return 'i1'; if (y < pi + pf) return 'f1'; }
+    var x = Math.random();
+    return x < .2 ? 't1' : x < .4 ? 't2' : x < .55 ? 't3' : 'a1';
+  }
+  function newHand(r) { var h = []; for (var k = 0; k < 3; k++) h.push(drawCard(r, h.length === 2 ? h : null)); if (!h.some(function (c) { return c[0] === 't'; })) h[rnd(3)] = 't' + (1 + rnd(3)); return h; }
+  function area(s) { return [s].concat(NB[s]); }
+  function treeCount(b) { return b.filter(isTree).length; }
+  function tiersOf(v, i) { return isTree(v) ? v.filter(function (o) { return o === i; }).length : 0; }
+  function cardOf(p, k) { return k === 3 ? p.sp : p.h[k]; }
+  function mult(r) { return r >= ROUNDS ? 2 : 1; }
+  var OLD = RULES.oldGrowthAt;
+  function isOld(v) { return isTree(v) && v.length >= OLD; }
+  function income(b, i, M) { var n = 0; b.forEach(function (v) { if (isTree(v)) v.forEach(function (o) { if (o === i) n += isOld(v) ? 2 : 1; }); }); return n * (M || 1); }
+  var EVENTS = ['spurt', 'boom', 'seed'];
+  var EVNAME = { spurt: 'Growth spurt', boom: 'Logging boom', seed: 'Seed fall' };
+  function cutPer(st) { return st.ev === 'boom' ? RULES.boomPays : CUTX; }
+  function validMove(st, m) { return !!m && typeof m === 'object' && m.g === st.g && m.r === st.r && (m.s | 0) === m.s && m.s >= 0 && m.s < NC && [0, 1, 2, 3].indexOf(m.k) >= 0; }
+  function legal(st, i, k, s) {
+    var c = cardOf(st.pl[i], k); if (!c) return false;
+    var v = st.b[s], t = kind(c);
+    if (t === 't') return !isTree(v) || v.length < CAP;
+    if (t === 'a') return isTree(v);
+    if (t === 'i') return s === 0;
+    if (t === 'f') return isTree(v) && v.some(function (o) { return o !== i; });
+    return true;
+  }
+  function newGame(players) {
+    NPL = players.length; ROUNDS = settingsFor(NPL).R; MINTREES = settingsFor(NPL).m;
+    return { g: Math.random().toString(36).slice(2, 8), ph: 'pick', r: 1, co: 0, pl: players.map(function (p) { return { id: p.id, n: p.n, s: 0, h: newHand(1), sp: null }; }), b: Array(NC).fill(null), last: null, lk: [], ev: null, evCells: [], fc: null, R: settingsFor(players.length).R, m: settingsFor(players.length).m, evs: (function () { var e = EVENTS.slice().sort(function () { return Math.random() - .5; }); return players.length >= 5 ? { 3: e[0], 6: e[1] } : { 3: e[0], 6: e[1], 9: e[2] }; })(), stat: { cut: players.map(function () { return 0; }), tall: { h: 0, own: [] } } };
+  }
+
+  function botMove(st, i) {
+    useState(st);
+    var p = st.pl[i], b = st.b, R = ROUNDS - st.r + 1, T = treeCount(b), m2 = mult(st.r);
+    var pers = (p.id && String(p.id).indexOf('bot') === 0) ? BOTS[+String(p.id).slice(3) % 2] : { grow: 1, cut: 1 };
+    var best = null, bv = -1e9;
+    for (var k = 0; k < 4; k++) {
+      var c = cardOf(p, k); if (!c) continue; var t = kind(c), n = power(c);
+      for (var s = 0; s < NC; s++) {
+        if (!legal(st, i, k, s)) continue;
+        var v = b[s], h = isTree(v) ? v.length : 0, mine = tiersOf(v, i), val = 0;
+        if (t === 't') { val = n * R * .45 * pers.grow - (h + n) * .12 * R * .25 + mine * .4; if (h === 0 && T < 5) val += 3; }
+        else if (t === 'a') { val = h * cutPer(st) * m2 * 1.2 * pers.cut - mine * R * .7; if (st.r >= 3 && T - 1 < MINTREES + 1) val -= 30; }
+        else if (t === 'i') { val = 0; b.forEach(function (w) { if (isTree(w)) val += tiersOf(w, i) * (w.length >= 4 ? .5 : .15); }); val *= st.ev === 'boom' ? 1.6 : 1; }
+        else if (t === 'f') { val = R * .9 + h * .1; }
+        else if (t === 'g') { val = area(s).filter(function (x) { return !isTree(b[x]); }).length * R * .45 * pers.grow; }
+        else { var fell = area(s).filter(function (x) { return isTree(b[x]); }); val = fell.reduce(function (a, x) { return a + b[x].length * CUTX * 1.2 * pers.cut - tiersOf(b[x], i) * R * .7; }, 0); if (T - fell.length < MINTREES + 1) val -= 40; }
+        val += Math.random() * 1.6;
+        if (val > bv) { bv = val; best = { k: k, s: s }; }
+      }
+    }
+    return best;
+  }
+
+  function resolve(st, moves) {
+    useState(st);
+    var b = st.b, pre = clone(b), np = st.pl.length, plays = [], M = mult(st.r);
+    st.pl.forEach(function (p, i) { var m = moves[i]; if (!m || !legal(st, i, m.k, m.s)) m = botMove(st, i); if (m) plays.push({ i: i, k: m.k, s: m.s, c: cardOf(p, m.k) }); });
+    var cut = Array(np).fill(0), inc = Array(np).fill(0), ps = st.pl.map(function (p) { return p.s; });
+    // 1. growth (and barn raising: 2+ players growing the same tree)
+    var growers = {}, barn = [], bonus = Array(np).fill(0);
+    plays.forEach(function (x) { if (kind(x.c) === 't') { growers[x.s] = growers[x.s] || []; if (growers[x.s].indexOf(x.i) < 0) growers[x.s].push(x.i); } });
+    Object.keys(growers).forEach(function (s) { if (growers[s].length > 1) { barn.push([+s, growers[s]]); growers[s].forEach(function (i) { bonus[i] += RULES.barnBonus * M; }); } });
+    plays.slice().sort(function () { return Math.random() - .5; }).forEach(function (x) {
+      if (kind(x.c) !== 't') return; if (!isTree(b[x.s])) b[x.s] = [];
+      for (var q = 0; q < power(x.c) && b[x.s].length < CAP; q++) b[x.s].push(x.i);
+    });
+    plays.forEach(function (x) { if (kind(x.c) === 'g') area(x.s).forEach(function (a) { if (!isTree(b[a])) b[a] = [x.i]; }); });
+    // 2. grafts: re-tie the highest tier that isn't yours
+    var grafts = [];
+    plays.forEach(function (x) { if (kind(x.c) !== 'f' || !isTree(b[x.s])) return; var v = b[x.s]; for (var t = v.length - 1; t >= 0; t--) if (v[t] !== x.i) { v[t] = x.i; grafts.push([x.s, t, x.i]); break; } });
+    var b1 = clone(b);
+    // 3. injunction: nobody can cut this round
+    var inj = plays.filter(function (x) { return kind(x.c) === 'i'; }).map(function (x) { return x.i; });
+    var sit = {}; if (inj.length) b.forEach(function (v, s) { if (isTree(v)) sit[s] = inj[0]; });
+    // 4. cuts
+    var who = {}, ax = [];
+    plays.forEach(function (x) { if (kind(x.c) === 'a' && isTree(b[x.s])) { (who[x.s] = who[x.s] || []).push(x.i); if (ax.indexOf(x.s) < 0) ax.push(x.s); } });
+    var down = {};
+    Object.keys(who).forEach(function (s) { if (sit[s] == null) down[s] = who[s].slice(); });
+    plays.forEach(function (x) { if (kind(x.c) === 'c') area(x.s).forEach(function (a) { if (isTree(b[a]) && sit[a] == null) { down[a] = down[a] || []; if (down[a].indexOf(x.i) < 0) down[a].push(x.i); } }); });
+    var fell = [];
+    Object.keys(down).forEach(function (s) { var h = b[s].length; down[s].forEach(function (i) { cut[i] += cutPer(st) * h * M; st.stat.cut[i]++; }); fell.push([+s, h, down[s]]); b[s] = 's' + st.r; });
+    // 5. income
+    b.forEach(function (v) { if (isTree(v)) v.forEach(function (o) { if (o >= 0) inc[o] += M * (isOld(v) ? 2 : 1); }); });
+    st.pl.forEach(function (p, i) { inc[i] += bonus[i]; p.s += cut[i] + inc[i]; });
+    // lightning: the tallest tree falls, nobody scores it
+    // tallest tree so far
+    b1.forEach(function (v) { if (isTree(v) && v.length > st.stat.tall.h) { var own = []; v.forEach(function (o) { if (o >= 0 && own.indexOf(o) < 0) own.push(o); }); st.stat.tall = { h: v.length, own: own }; } });
+    // 6. natural growth every 2 rounds
+    var ng = st.r % 2 === 0 ? 1 : 0;
+    if (ng) b.forEach(function (v) { if (isTree(v) && v.length < CAP) v.push(-1); });
+    // 7. hands
+    plays.forEach(function (x) { var p = st.pl[x.i]; if (x.k === 3) p.sp = null; else p.h[x.k] = drawCard(st.r + 1, p.h); });
+    st.pl.forEach(function (p) { if (!p.h.some(function (c) { return c[0] === 't'; })) p.h[rnd(3)] = 't' + (1 + rnd(3)); });
+    if (st.r >= 4 && treeCount(b) < MINTREES) { st.co = 1; st.coR = st.r; }
+    st.last = { r: st.r, pre: pre, b1: b1, fell: fell, cut: cut, inc: inc, ps: ps, ng: ng, ax: ax, inj: inj, barn: barn, ev: st.ev, gr: grafts, pl: plays.map(function (x) { return [x.i, x.c, x.s]; }) };
+    st.ph = 'reveal'; st.lk = [];
+  }
+  function nextRound(st) {
+    useState(st);
+    if (st.co || st.r >= ROUNDS) { st.ph = 'over'; return; }
+    st.r += 1; st.ph = 'pick'; st.lk = [];
+    st.ev = st.evs[st.r] || null; st.evCells = []; st.fc = st.evs[st.r + 1] || null;
+    if (st.ev === 'spurt') { var tr = []; st.b.forEach(function (v, s) { if (isTree(v) && v.length < CAP) tr.push(s); }); if (tr.length) { var s1 = tr[rnd(tr.length)], h0 = st.b[s1].length; for (var q = 0; q < 3 && st.b[s1].length < CAP; q++) st.b[s1].push(-1); st.evCells = [[s1, h0]]; } else st.ev = 'seed'; }
+    if (st.ev === 'seed') { var em = []; st.b.forEach(function (v, s) { if (!isTree(v)) em.push(s); }); em.sort(function () { return Math.random() - .5; }); em.slice(0, 3).forEach(function (s) { st.b[s] = [-1]; st.evCells.push([s, 0]); }); }
+    var sc = st.pl.map(function (p) { return p.s; }), lo = Math.min.apply(null, sc), all = sc.every(function (v) { return v === lo; });
+    var cut = sc.slice().sort(function (a, b) { return a - b; })[Math.max(0, Math.ceil(st.pl.length / 4) - 1)];
+    st.pl.forEach(function (p) {
+      var last = st.r >= 3 && !all && p.s <= cut;
+      if (!last) p.sp = null; else if (!p.sp) p.sp = treeCount(st.b) < 6 ? 'g' : (Math.random() < .5 ? 'g' : 'c');
+    });
+  }
+
+  /* ---------- engine ---------- */
+  function revealMs(L) { return 2600 + (L && L.fell.length ? 2000 : 0) + (L && L.inj && L.inj.length ? 600 : 0); }
+  function Engine(getMoves, publish) { this.st = null; this.endAt = 0; this.getMoves = getMoves; this.publish = publish; }
+  Engine.prototype.start = function (players) { this.st = newGame(players); this.endAt = Date.now() + PICK_MS; this.tick(); };
+  Engine.prototype.tick = function () {
+    var st = this.st; if (!st) return; var now = Date.now();
+    if (st.ph === 'pick') {
+      var mv = this.getMoves(st); st.lk = Object.keys(mv).map(Number);
+      if (st.lk.length === st.pl.length && this.endAt - now > ALLIN_MS) this.endAt = now + ALLIN_MS;
+      if (now >= this.endAt) { resolve(st, mv); this.endAt = now + revealMs(st.last); }
+    } else if (st.ph === 'reveal' && now >= this.endAt) { nextRound(st); if (st.ph === 'pick') this.endAt = now + PICK_MS; }
+    st.left = st.ph === 'pick' ? Math.ceil(Math.max(0, this.endAt - now) / 500) * 500 : 0;
+    this.publish(st);
+  };
+
+  /* ---------- drawing ---------- */
+  var R = 30, K = .6, HW = Math.sqrt(3) * R, D = 10, TIER = 11;
+  var POS = HEX.map(function (h) { return [HW * (h[0] + h[1] / 2), 1.5 * R * h[1] * K]; });
+  var ORDER = HEX.map(function (h, i) { return i; }).sort(function (a, b) { return (POS[a][1] - POS[b][1]) || (POS[a][0] - POS[b][0]); });
+  function corner(x, y, a, s) { var ang = Math.PI / 180 * a, rr = R - (s || 0); return [x + rr * Math.cos(ang), y + rr * Math.sin(ang) * K]; }
+  function hexPts(x, y, s) { var p = []; for (var a = -90; a < 270; a += 60) { var c = corner(x, y, a, s); p.push(c[0].toFixed(1) + ',' + c[1].toFixed(1)); } return p.join(' '); }
+  function step(k) { return TIER * Math.max(.55, 1 - .07 * k); }
+  function tierBase(k) { var y = -3; for (var j = 0; j < k; j++) y -= step(j); return y; }
+  var BGL = '#4f8a5a', BGRN = '#2f5a3a', BTILE = '#17251c', GL = BGL, GRN = BGRN, TILE = BTILE;
+  function grade(r, co) {
+    var t = r ? Math.min(1, (r - 1) / (ROUNDS - 1)) : .5, tint, a;
+    if (co) { tint = '#6b6a60'; a = .35; } else if (t < .35) { tint = '#9a7a4a'; a = .14 * (1 - t / .35); } else if (t > .65) { tint = '#b09a50'; a = .16 * ((t - .65) / .35); } else { tint = '#3f6f7a'; a = .1 * (1 - Math.abs(t - .5) / .15); }
+    a = Math.max(0, a); GL = mix(BGL, tint, a); GRN = mix(BGRN, tint, a * .8); TILE = mix(BTILE, tint, a * .6);
+  }
+  function vary(i) { var x = Math.sin(i * 12.9898 + 4.1) * 43758.5453; return x - Math.floor(x); }
+  function pine(x, yb, tiers, o) {
+    o = o || {}; var n = tiers.length, s = '', v = o.v == null ? .5 : o.v, wf = .8 + v * .4, tone = (v - .5) * .14;
+    var sh = o.shadow == null ? 0 : o.shadow, shLen = Math.min(n, 6) * 1.2;
+    s += '<ellipse cx="' + (x + sh * (.6 + shLen * .08)) + '" cy="' + (yb + 1) + '" rx="' + (11 + Math.abs(sh) * (.35 + shLen * .05)) + '" ry="5" fill="#000" opacity=".22"/><ellipse cx="' + x + '" cy="' + (yb + .5) + '" rx="7" ry="2.8" fill="#000" opacity=".55" filter="url(#cs)"/><rect x="' + (x - 1.6) + '" y="' + (yb - 5) + '" width="3.2" height="5" rx="1" fill="#5a4030"/>';
+    var y = yb - 3, w0 = (11.5 + Math.min(n, 6) * .6) * wf;
+    for (var k = 0; k < n; k++) {
+      var w = w0 - k * (w0 - 4) / Math.max(n, 2), st = step(k), top = y - st - 6, own = tiers[k], dk = (n - k) * .012;
+      var cls = (o.from != null && k >= o.from) ? ' class="nt" style="animation-delay:' + ((k - o.from) * 70) + 'ms"' : (o.popLast && k === n - 1 ? ' class="pop"' : '');
+      var gh = o.ghostFrom != null && k >= o.ghostFrom ? ' opacity=".5"' : '';
+      s += '<g' + cls + gh + '>';
+      s += '<path d="M' + x + ' ' + top + ' L' + (x - w) + ' ' + y + ' L' + x + ' ' + (y + 2.4) + 'Z" fill="' + shade(GL, tone - dk) + '"/>';
+      s += '<path d="M' + x + ' ' + top + ' L' + (x + w) + ' ' + y + ' L' + x + ' ' + (y + 2.4) + 'Z" fill="' + shade(GRN, tone - dk) + '"/>';
+      s += '<path d="M' + x + ' ' + top + ' L' + (x - w) + ' ' + y + '" stroke="#e4f5d6" stroke-opacity=".42" stroke-width=".9" stroke-linecap="round"/>';
+      if (o.old && k === 0) s += '<path d="M' + (x - w * .9) + ' ' + (y - 3.5) + ' L' + x + ' ' + (y - 1.5) + ' L' + (x + w * .9) + ' ' + (y - 3.5) + '" fill="none" stroke="#a8d870" stroke-width="2.6" stroke-linecap="round" opacity=".85"/>';
+      var oc = (o.retie && o.retie === k) ? o.retieC : own;
+      if (oc >= 0) { var c = COLORS[oc]; s += '<path' + (o.retie === k ? ' class="pulse"' : '') + ' d="M' + (x - w * .86) + ' ' + (y - 1.6) + ' L' + x + ' ' + (y + .6) + ' L' + (x + w * .86) + ' ' + (y - 1.6) + '" fill="none" stroke="' + c + '" stroke-width="' + (oc === o.me ? 3 : 2.4) + '" stroke-linecap="round" stroke-linejoin="round"' + (DASH[oc] ? ' stroke-dasharray="' + DASH[oc] + '"' : '') + '/>'; }
+      s += '</g>';
+      y -= st;
+    }
+    return s;
+  }
+  function axeIcon(x, y, sc, cls) { return '<g transform="translate(' + x + ',' + y + ') scale(' + sc + ')"><g' + (cls ? ' class="' + cls + '"' : '') + ' transform="rotate(-25)"><rect x="-1.6" y="-14" width="3.2" height="26" rx="1.5" fill="#a07a56"/><path d="M1.5 -14 C9 -15 13 -10 12 -3 L1.5 -5Z" fill="#dfe6e2"/></g></g>'; }
+  function treeTop(v) { return isTree(v) ? tierBase(v.length) - 6 : -6; }
+  /* o: {me, r, open:[], target, ghost:{i,add}|{area,add}, sitAt:[{i,c}], axeAt:[], dots:[{i,c}], newFrom:{}, fall:[i], pop, labels, areaHL:[], fade:i, retie:{i:[t,c]}, danger, trees} */
+  function boardSvg(b, o) {
+    o = o || {}; var s = '', me = o.me, mc = me != null && me >= 0 ? COLORS[me] : null;
+    var minX = -HW * 2.5 - 2, maxX = HW * 2.5 + 2, frontY = POS[ORDER[NC - 1]][1] + R * K;
+    var faded = {};
+    if (o.fade != null) { var fx = POS[o.fade][0], fy = POS[o.fade][1]; for (var j = 0; j < NC; j++) if (POS[j][1] > fy + 1 && Math.abs(POS[j][0] - fx) < HW * 1.05 && isTree(b[j])) faded[j] = 1; }
+    s += '<ellipse cx="0" cy="' + (frontY + 96) + '" rx="150" ry="12" fill="' + (o.danger ? '#e8875f' : '#8fc186') + '" opacity="' + (o.danger ? .04 : .06) + '" filter="url(#gl)"/><g class="isle">';
+    var midY = POS[ORDER[9]][1];
+    s += '<polygon points="' + [minX + 6, midY + D, 0, frontY + D, 0, frontY + 92, minX + 56, midY + 50].join(',') + '" fill="#101813"/>';
+    s += '<polygon points="' + [0, frontY + D, maxX - 6, midY + D, maxX - 56, midY + 50, 0, frontY + 92].join(',') + '" fill="#0b110d"/>';
+    s += '<polygon points="' + [minX + 56, midY + 50, 0, frontY + 92, maxX - 56, midY + 50, 0, frontY + 128].join(',') + '" fill="#080c0a"/>';
+    var sway = (Date.now() / 1000) % 5, tt = o.r ? Math.min(1, (o.r - 1) / (ROUNDS - 1)) : .5, shOff = (.5 - tt) * 26;
+    ORDER.forEach(function (i) {
+      var x = POS[i][0], y = POS[i][1], v = b[i], base = TILE, mine = mc && tiersOf(v, me) > 0, open = o.open && o.open.indexOf(i) >= 0;
+      s += '<g class="cell' + (open ? ' open' : '') + '" data-i="' + i + '">';
+      var c30 = corner(x, y, 30), c90 = corner(x, y, 90), c150 = corner(x, y, 150);
+      s += '<polygon points="' + [c150[0], c150[1], c90[0], c90[1], c90[0], c90[1] + D, c150[0], c150[1] + D] + '" fill="' + shade(base, -.4) + '"/>';
+      s += '<polygon points="' + [c90[0], c90[1], c30[0], c30[1], c30[0], c30[1] + D, c90[0], c90[1] + D] + '" fill="' + shade(base, -.56) + '"/>';
+      s += '<polygon points="' + hexPts(x, y) + '" fill="' + base + '" stroke="#8fc1861a"/>';
+      if (mine) s += '<polygon points="' + hexPts(x, y) + '" fill="' + mc + '" opacity=".2"/><ellipse cx="' + x + '" cy="' + (y - 8) + '" rx="17" ry="13" fill="' + mc + '" opacity=".22" filter="url(#gl2)"/>';
+      if (o.areaHL && o.areaHL.indexOf(i) >= 0) s += '<polygon points="' + hexPts(x, y, 2) + '" fill="' + (mc || '#e6b65c') + '" fill-opacity=".2"/>';
+      if (open) s += '<polygon points="' + hexPts(x, y, 4) + '" fill="' + mc + '" fill-opacity=".06"/>';
+      var gh = o.ghost && ((o.ghost.i === i) || (o.ghost.area && o.ghost.area.indexOf(i) >= 0 && !isTree(v)));
+      if (isTree(v) || gh) {
+        var tiers = isTree(v) ? v.slice() : [], gf = null;
+        if (gh) { gf = tiers.length; for (var a = 0; a < o.ghost.add && tiers.length < CAP; a++) tiers.push(me); }
+        var po = { me: me, ghostFrom: gf, from: o.newFrom && o.newFrom[i] != null ? o.newFrom[i] : null, popLast: o.pop && isTree(v) && v[v.length - 1] === -1 };
+        if (o.retie && o.retie[i]) { po.retie = o.retie[i][0]; po.retieC = o.retie[i][1]; }
+        var swayStyle = 'animation-delay:-' + ((sway + i * .73) % 5).toFixed(2) + 's';
+        po.v = vary(i); po.shadow = shOff; po.old = tiers.length >= OLD && !gh;
+        if (o.fall && o.fall.indexOf(i) >= 0) {
+          var tall = tiers.length >= 5, dir = x >= 0 ? 'fallR' : 'fallL';
+          s += '<g class="' + dir + '" style="transform-origin:' + x + 'px ' + (y + 1) + 'px;animation-delay:' + (tall ? 350 : 0) + 'ms">' + pine(x, y + 1, tiers, { me: me, v: vary(i), shadow: shOff }) + '</g>';
+        } else s += '<g class="tree' + (faded[i] ? ' faded' : '') + '" style="' + swayStyle + '">' + pine(x, y + 1, tiers, po) + '</g>';
+      }
+      s += '</g>';
+    });
+    // overlay (no pointer events): outlines over trees, markers, dots
+    s += '<g style="pointer-events:none">';
+    if (o.open) o.open.forEach(function (i) { var x = POS[i][0], y = POS[i][1]; s += '<polygon class="hl" points="' + hexPts(x, y, 4) + '" fill="none" stroke="' + mc + '" stroke-width="1.2" stroke-dasharray="3 3"/>'; });
+    if (o.areaHL) o.areaHL.forEach(function (i) { var x = POS[i][0], y = POS[i][1]; s += '<polygon points="' + hexPts(x, y, 2) + '" fill="none" stroke="' + (mc || '#e6b65c') + '" stroke-width="1.6" stroke-dasharray="4 4"/>'; });
+    if (o.target != null) { var tx = POS[o.target][0], ty = POS[o.target][1]; s += '<polygon points="' + hexPts(tx, ty, -2) + '" fill="none" stroke="' + (mc || '#e6b65c') + '" stroke-width="2" stroke-dasharray="5 4"/>'; }
+    (o.axeAt || []).forEach(function (i) { s += axeIcon(POS[i][0] + 20, POS[i][1] + treeTop(b[i]) + 24, 1, 'swing'); });
+    (o.clatter || []).forEach(function (i) { s += axeIcon(POS[i][0] + 20, POS[i][1] + treeTop(b[i]) + 24, 1, 'clatter'); });
+    (o.dots || []).forEach(function (d, j) { s += '<circle class="nt" style="animation-delay:' + (j * 80) + 'ms" cx="' + (POS[d.i][0] + d.dx) + '" cy="' + (POS[d.i][1] + 2) + '" r="4.5" fill="' + d.c + '" stroke="#0b1410" stroke-width="1.5"/>'; });
+    s += '</g></g>';
+    if (o.banner) { var cy = POS[9][1] - 30; s += '<g class="banner"><rect x="' + (minX + 10) + '" y="' + (cy - 15) + '" width="' + (maxX - minX - 20) + '" height="30" rx="4" fill="#efe6d0" opacity=".95"/><path d="M' + (minX + 22) + ' ' + (cy - 9) + ' h' + (maxX - minX - 44) + ' M' + (minX + 22) + ' ' + (cy + 9) + ' h' + (maxX - minX - 44) + '" stroke="#b49a6a" stroke-width="1" opacity=".7"/><text x="0" y="' + (cy + 5) + '" text-anchor="middle" font-family="Inter Tight,system-ui" font-weight="700" font-size="14" letter-spacing="3" fill="#5a4630">INJUNCTION</text><circle cx="' + (maxX - 40) + '" cy="' + cy + '" r="9" fill="' + o.banner + '"/></g>'; }
+    (o.labels || []).forEach(function (L, j) { var w = 12 + L.t.length * 7.2; s += '<g transform="translate(' + (POS[L.i][0] + (L.dx || 0)) + ',' + (POS[L.i][1] + (L.dy != null ? L.dy : -60)) + ')"><g class="lab" style="animation-delay:' + (L.delay || j * 90) + 'ms"><rect x="' + (-w / 2) + '" y="-11" width="' + w + '" height="22" rx="11" fill="' + L.c + '"/><text x="0" y="4.5" text-anchor="middle" font-family="Inter Tight,system-ui" font-weight="700" font-size="12.5" fill="#0b1410">' + L.t + '</text></g></g>'; });
+    var topY = POS[ORDER[0]][1] - R * K - 112;
+    return { vb: (minX - 10) + ' ' + topY + ' ' + (maxX - minX + 20) + ' ' + (frontY + 140 - topY), html: s };
+  }
+  function burst(i, h) {
+    var x = POS[i][0], y = POS[i][1], dir = x >= 0 ? 1 : -1, s = '';
+    for (var k = 0; k < 14; k++) {
+      var dist = 18 + h * 4 + Math.random() * 20, ang = (Math.random() * 140 - 70) * Math.PI / 180;
+      var dx = dir * (h * 5) + Math.cos(ang) * dist * (Math.random() < .5 ? -1 : 1), dy = -Math.abs(Math.sin(ang) * dist) - 6;
+      var px = x + dir * (h * 4), py = y - 2;
+      s += k % 3 === 0 ? '<rect class="chip-p" style="--dx:' + dx.toFixed(0) + 'px;--dy:' + dy.toFixed(0) + 'px" x="' + px + '" y="' + py + '" width="3" height="2" fill="#c9a77f"/>' : '<path class="chip-p" style="--dx:' + dx.toFixed(0) + 'px;--dy:' + dy.toFixed(0) + 'px" d="M' + px + ' ' + py + ' l3 -2" stroke="#6fae74" stroke-width="1.4" stroke-linecap="round"/>';
+    }
+    return s;
+  }
+  function setSvg(svg, out) { svg.setAttribute('viewBox', out.vb); svg.innerHTML = out.html; }
+  function dots(n, c) { var s = ''; for (var k = 0; k < 3; k++) s += '<circle cx="' + ((k - 1) * 6) + '" cy="19" r="1.9" fill="' + (k < n ? c : '#ffffff22') + '"/>'; return s; }
+  function cardSvg(c, me) {
+    var t = kind(c), n = power(c), mc = COLORS[me >= 0 ? me : 0], tiers = [], k;
+    var vb = '<svg viewBox="-26 -54 52 78" aria-hidden="true">';
+    if (t === 't') { for (k = 0; k < n; k++) tiers.push(me); return vb + pine(0, 10, tiers, { me: me }) + dots(n, mc) + '</svg>'; }
+    if (t === 'a') return vb + axeIcon(0, -10, 1.9) + '</svg>';
+    if (t === 'i') return vb + '<rect x="-16" y="-40" width="32" height="42" rx="3" fill="#efe6d0"/><path d="M-10 -31 h20 M-10 -24 h20 M-10 -17 h14" stroke="#b49a6a" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="-6" r="6.5" fill="' + mc + '"/><path d="M5 -6 h6" stroke="#0b1410" stroke-width="1.4"/>' + axeIcon(-12, 12, .8) + '<path d="M-22 4 L-2 20" stroke="#e8875f" stroke-width="2.4" stroke-linecap="round"/></svg>';
+    if (t === 'f') return vb + pine(0, 14, [-1, -1, me], { me: me }) + '<circle cx="13" cy="-18" r="6" fill="' + mc + '"/><path d="M10 -18 l2 2 l4 -4.5" stroke="#0b1410" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>';
+    var hx = [[0, -12], [-12, -18], [12, -18], [-12, -4], [12, -4], [0, 2], [0, -26]];
+    if (t === 'g') return vb + hx.sort(function (a, b) { return a[1] - b[1]; }).map(function (p) { return pine(p[0], p[1] + 8, [me], { me: me }).replace(/rx="12"/, 'rx="6"'); }).join('') + '</svg>';
+    return vb + '<g opacity=".35">' + hx.slice().sort(function (a, b) { return a[1] - b[1]; }).map(function (p) { return pine(p[0], p[1] + 8, [-1], {}).replace(/rx="12"/, 'rx="6"'); }).join('') + '</g>' + axeIcon(2, -16, 1.5) + '</svg>';
+  }
+  var CNAME = { t: 'Tree', a: 'Axe: fell any tree', g: 'Grove: plant a flower of trees', c: 'Clearcut: fell a flower of trees', i: 'Injunction: no tree can be cut this round', f: 'Graft: re-tie one tier to your color' };
+
+  /* ---------- sky: dusk to dawn ---------- */
+  var skyFlip = 0;
+  function skyColors(r, co) {
+    if (co) return ['#161616', '#2b2926'];
+    var t = (r - 1) / (ROUNDS - 1), dusk = ['#0d1112', '#2b2024'], night = ['#0a100d', '#111a15'], dawn = ['#0e1519', '#33281f'];
+    if (t < .4) { var u = t / .4; return [mix(dusk[0], night[0], u), mix(dusk[1], night[1], u)]; }
+    if (t > .6) { var w = (t - .6) / .4; return [mix(night[0], dawn[0], w), mix(night[1], dawn[1], w)]; }
+    return night;
+  }
+  var lastSky = '';
+  function setSky(r, co) {
+    var c = skyColors(r, co), key = c.join(); if (key === lastSky) return; lastSky = key;
+    var a = $('skyA'), b = $('skyB'), on = skyFlip ? a : b, off = skyFlip ? b : a; skyFlip = 1 - skyFlip;
+    on.style.background = 'linear-gradient(to bottom,' + c[0] + ' 0%,' + c[0] + ' 30%,' + c[1] + ' 100%)'; on.style.opacity = 1; off.style.opacity = 0;
+    var t = (r - 1) / (ROUNDS - 1); document.documentElement.style.setProperty('--stars', co ? .05 : (t > .7 ? (.35 - (t - .7) / .3 * .3).toFixed(2) : .35));
+  }
+
+  /* ---------- title ---------- */
+  (function () {
+    var hb = [null, [0, 0, -1], null, [2], null, [1, -1], [0, 1, 1, 2, -1, -1], null, [2, 2, -1], null, [0], null, [1, 0, -1], null, null, [1], null, [2, 0], null];
+    var hs = $('hero'), t0 = Date.now(), still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    hs.setAttribute('viewBox', (-HW * 2.5 - 14) + ' ' + (-R * K * 3 - 110) + ' ' + (HW * 5 + 28) + ' ' + (R * K * 6 + 230));
+    function heroFrame() {
+      if (!$('s-join').hidden) {
+        var th = still ? .25 : ((Date.now() - t0) / 1000) * .12, c = Math.cos(th), sn = Math.sin(th), cells = [];
+        HEX.forEach(function (h, i) { var x = HW * (h[0] + h[1] / 2), z = 1.5 * R * h[1]; cells.push({ i: i, x: x * c - z * sn, y: (x * sn + z * c) * K }); });
+        cells.sort(function (a, b) { return a.y - b.y; });
+        var out = '<ellipse cx="0" cy="' + (R * K * 3 + 104) + '" rx="150" ry="11" fill="#8fc186" opacity=".05" filter="url(#gl)"/>';
+        out += '<polygon points="' + [-HW * 2.45, 6, 0, R * K * 3.2 + 10, 0, R * K * 3.2 + 96, -HW * 1.5, 52].join(',') + '" fill="#0d1410"/><polygon points="' + [0, R * K * 3.2 + 10, HW * 2.45, 6, HW * 1.5, 52, 0, R * K * 3.2 + 96].join(',') + '" fill="#090e0b"/>';
+        var deg = th * 180 / Math.PI;
+        cells.forEach(function (cl) {
+          var x = cl.x, y = cl.y, pts = [];
+          for (var a = 0; a < 6; a++) { var ang = (a * 60 - 90 + deg) * Math.PI / 180; pts.push([x + R * Math.cos(ang), y + R * Math.sin(ang) * K]); }
+          for (var e = 0; e < 6; e++) { var n = ((e * 60 - 60 + deg) * Math.PI / 180); if (Math.sin(n) > .05) { var p1 = pts[e], p2 = pts[(e + 1) % 6]; out += '<polygon points="' + [p1[0], p1[1], p2[0], p2[1], p2[0], p2[1] + D, p1[0], p1[1] + D].map(function (v) { return v.toFixed(1); }) + '" fill="' + shade(BTILE, Math.cos(n) > 0 ? -.55 : -.38) + '"/>'; } }
+          out += '<polygon points="' + pts.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ') + '" fill="' + BTILE + '" stroke="#8fc1861a"/>';
+          var v = hb[cl.i]; if (v) out += '<g class="tree" style="animation-delay:-' + (cl.i * .7 % 5).toFixed(1) + 's">' + pine(x, y + 1, v, { me: 0, v: vary(cl.i), shadow: 8 }) + '</g>';
+        });
+        hs.innerHTML = '<g class="isle">' + out + '</g>';
+      }
+      setTimeout(heroFrame, still ? 1000 : 60);
+    }
+    heroFrame();
+    var how = [
+      ['<svg viewBox="-24 -50 48 56">' + pine(0, 4, [0, 1, 2], { me: 0 }) + '</svg>', 'Stack tiers on any tree. Each tier with your ribbon pays you 1 a round.'],
+      ['<svg viewBox="-24 -40 48 48">' + axeIcon(0, -14, 1.5) + '</svg>', 'One axe fells any tree. Score double its height.'],
+      ['<svg viewBox="-24 -40 48 46">' + '<g opacity=".35">' + pine(-9, 2, [-1, -1], {}) + '</g>' + pine(9, 4, [-1], {}) + '</svg>', 'Let the forest get too thin, and everyone loses.']
+    ];
+    $('how').innerHTML = how.map(function (h) { return '<li>' + h[0] + '<span>' + h[1] + '</span></li>'; }).join('');
+  })();
+
+  /* ---------- client ---------- */
+  var mode = null, me = { id: null, name: '' }, sel = { g: null, r: 0, k: null, s: null }, hover = null, evAnimKey = '';
+  var solo = null, botAt = {}, botMv = {}, seenG = null, animKey = '', busyUntil = 0, overKey = '', handKey = '', chipsKey = '', boardKey = '', scoreOverride = null, timers = [];
+  var boardEl = $('board');
+  boardEl.addEventListener('click', function (e) { var c = e.target.closest && e.target.closest('[data-i]'); if (c) onSquare(+c.getAttribute('data-i')); });
+  boardEl.addEventListener('mousemove', function (e) { var c = e.target.closest && e.target.closest('[data-i]'), h = c ? +c.getAttribute('data-i') : null; if (h !== hover) { hover = h; if (sel.k != null) render(); } });
+  boardEl.addEventListener('mouseleave', function () { if (hover != null) { hover = null; if (sel.k != null) render(); } });
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+
+  function curState() { if (mode === 'solo') return solo && solo.st; if (mode === 'live') return liveState(); return null; }
+  function myIndex(st) { for (var i = 0; i < st.pl.length; i++) if (st.pl[i].id === me.id) return i; return -1; }
+  function nameOf(st, i) { return i === myIndex(st) ? 'You' : (st.pl[i] ? st.pl[i].n : 'Someone'); }
+  function openSquares(st, mi, k) { var o = []; for (var s = 0; s < NC; s++) if (legal(st, mi, k, s)) o.push(s); return o; }
+  function joinNames(st, ids, mi) { var n = ids.map(function (i) { return nameOf(st, i); }); if (ids.indexOf(mi) > 0) { n.splice(ids.indexOf(mi), 1); n.unshift('You'); } return n.length > 1 ? n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1] : n[0]; }
+
+  function onCard(k) { var st = curState(); if (!st || st.ph !== 'pick') return; var mi = myIndex(st); if (mi < 0) return; sel.k = sel.k === k ? null : k; if (sel.k != null && kind(cardOf(st.pl[mi], sel.k)) === 'i') sel.s = 0; else if (sel.k != null && sel.s != null && !legal(st, mi, sel.k, sel.s)) sel.s = null; if (sel.k == null) sel.s = null; sendSel(st); render(); }
+  function onSquare(s) { var st = curState(); if (!st || st.ph !== 'pick') return; var mi = myIndex(st); if (mi < 0 || sel.k == null || kind(cardOf(st.pl[mi], sel.k)) === 'i' || !legal(st, mi, sel.k, s)) return; sel.s = sel.s === s ? null : s; sendSel(st); render(); }
+  function sendSel(st) { var m = (sel.k != null && sel.s != null) ? { g: st.g, r: st.r, s: sel.s, k: sel.k } : null; if (mode === 'live') { live.setPresence({ mv: m }); if (live.isHost) live.engine.tick(); } }
+
+  function renderChips(st, mi, scores, extra, extraCls) {
+    var key = JSON.stringify([st.pl.map(function (p) { return p.n; }), scores, st.ph === 'pick' ? st.lk : null, mi, extra]); if (key === chipsKey) return; chipsKey = key;
+    var box = $('chips'); box.innerHTML = ''; box.classList.toggle('many', st.pl.length > 4);
+    st.pl.forEach(function (p, i) {
+      var c = document.createElement('span'); c.className = 'chip' + (i === mi ? ' me' : '') + (st.ph === 'pick' ? ((st.lk || []).indexOf(i) >= 0 ? ' in' : ' wait') : ''); c.style.setProperty('--c', COLORS[i]);
+      var d = document.createElement('i'); d.style.background = COLORS[i]; d.textContent = initial(p.n); if (DASH[i]) d.className = i < 6 ? 'dash' : 'dot';
+      var n = document.createElement('b'); n.textContent = scores[i];
+      c.title = p.n; c.appendChild(d); c.appendChild(n);
+      if (extra && extra[i]) { var pl = document.createElement('span'); pl.className = 'plus' + (extraCls ? ' ' + extraCls : ''); pl.textContent = '+' + extra[i]; c.appendChild(pl); }
+      box.appendChild(c);
+    });
+  }
+  function renderMeta(st, b) {
+    var t = treeCount(b), low = t <= MINTREES + 1 && st.r >= 2;
+    $('round').textContent = st.r >= ROUNDS ? 'Final round' : 'Round ' + st.r + ' of ' + ROUNDS;
+    $('round').className = st.r >= ROUNDS ? 'fin' : '';
+    $('hp').textContent = t + (t === 1 ? ' tree' : ' trees'); $('hp').className = 'hp' + (low ? ' low' : '');
+    var ev = $('ev'); if (st.ph !== 'over' && (st.ev || st.fc)) { ev.hidden = false; ev.className = 'evp' + (st.ev ? ' now' : ''); ev.textContent = st.ev ? EVNAME[st.ev] : 'Next: ' + EVNAME[st.fc].toLowerCase(); } else ev.hidden = true;
+    document.body.classList.toggle('danger', low);
+  }
+  function renderHand(st, mi, fresh) {
+    var p = mi >= 0 ? st.pl[mi] : null, on = st.ph === 'pick' && !!p;
+    var cards = p ? [0, 1, 2, 3].map(function (k) { return cardOf(p, k); }) : [];
+    var key = JSON.stringify([cards, sel.k, on, st.g, st.b]); if (key === handKey) return; handKey = key;
+    var box = $('hand'); box.innerHTML = ''; box.hidden = !p;
+    cards.forEach(function (c, k) {
+      if (!c) return; var t = kind(c);
+      var b = document.createElement('button'); b.className = 'card' + (k === 3 ? ' sp' : '') + (t === 'i' || t === 'f' ? ' rare' : ''); b.setAttribute('aria-pressed', sel.k === k ? 'true' : 'false');
+      b.setAttribute('aria-label', CNAME[t] + (t === 't' ? ' ' + power(c) : '')); b.title = CNAME[t] + (t === 't' ? ' ' + power(c) : '');
+      b.disabled = !on || openSquares(st, mi, k).length === 0;
+      b.innerHTML = cardSvg(c, mi); b.addEventListener('click', function () { onCard(k); }); box.appendChild(b);
+    });
+    var kids = [].slice.call(box.children), nk = kids.length; kids.forEach(function (el, j) { var off = j - (nk - 1) / 2; el.style.setProperty('--rot', (off * 3.5) + 'deg'); el.style.setProperty('--dy', (Math.abs(off) * 4) + 'px'); });
+    if (fresh) { box.classList.remove('deal'); void box.offsetWidth; box.classList.add('deal'); setTimeout(function () { box.classList.remove('deal'); }, 900); }
+  }
+  function drawBoard(b, o, key) { if (key && key === boardKey) return; boardKey = key || ''; setSvg(boardEl, boardSvg(b, o)); }
+
+  function pickView(st, mi) {
+    var o = { me: mi, r: st.r, trees: treeCount(st.b), danger: treeCount(st.b) <= MINTREES + 1 && st.r >= 2 }, txt, M = mult(st.r);
+    if (mi < 0) { drawBoard(st.b, o, JSON.stringify(['w', st.g, st.r, st.b])); $('line').textContent = 'You’re watching this game.'; return; }
+    var p = st.pl[mi], c = sel.k != null ? cardOf(p, sel.k) : null, t = kind(c), n = c ? power(c) : 0;
+    if (c && t !== 'i') { o.open = openSquares(st, mi, sel.k).filter(function (s) { return s !== sel.s; }); o.fade = sel.s != null ? sel.s : hover; }
+    if (c && sel.s != null) {
+      var v = st.b[sel.s], h = isTree(v) ? v.length : 0;
+      if (t === 't') { o.ghost = { i: sel.s, add: n }; var add = Math.min(n, CAP - h), oldNow = h + add >= OLD ? 2 : 1, earn = (tiersOf(v, mi) + add) * M * oldNow; txt = (h ? (oldNow > 1 && h < OLD ? 'Old growth' : 'Stack') : 'New tree') + ' · +' + earn + ' a round'; }
+      else if (t === 'a') { o.target = sel.s; o.axeAt = [sel.s]; var lose = tiersOf(v, mi) * M * (isOld(v) ? 2 : 1); txt = 'Fells it for +' + cutPer(st) * h * M + (lose ? ', costs you ' + lose + ' a round' : ''); }
+      else if (t === 'i') { txt = 'No tree can be cut this round'; }
+      else if (t === 'f') { o.target = sel.s; var top = -1; for (var q = v.length - 1; q >= 0; q--) if (v[q] !== mi) { top = q; break; } o.retie = {}; o.retie[sel.s] = [top, mi]; txt = 'Takes one tier · +' + M * (isOld(v) ? 2 : 1) + ' a round'; }
+      else if (t === 'g') { var ar = area(sel.s); o.areaHL = ar; o.ghost = { area: ar, add: 1 }; var k2 = ar.filter(function (x) { return !isTree(st.b[x]); }).length; txt = k2 ? 'Plants ' + k2 + ' · +' + k2 * M + ' a round' : 'No room here'; }
+      else { var ar2 = area(sel.s); o.areaHL = ar2; var f = ar2.filter(function (x) { return isTree(st.b[x]); }); txt = f.length ? 'Fells ' + f.length + ' for +' + f.reduce(function (a, x) { return a + cutPer(st) * M * st.b[x].length; }, 0) : 'No trees here'; if (f.length && treeCount(st.b) - f.length < MINTREES && st.r >= 4) txt = 'This would end the forest'; }
+    } else if (c) {
+      txt = { t: 'Tap a tile', a: 'Tap a tree', i: '', f: 'Tap a tree', g: 'Tap the center', c: 'Tap the center' }[t];
+      if ((t === 'g' || t === 'c') && hover != null) { o.areaHL = area(hover); }
+    }
+    else if (p.sp && st.last && st.r >= 3) txt = 'You got a comeback card';
+    else if (st.ev) txt = { spurt: 'A tree shot up 3 tiers', boom: 'Cutting pays triple this round', seed: 'Free saplings, anyone can stack' }[st.ev];
+    else if (st.r >= ROUNDS) txt = 'Last round · double points';
+    else txt = 'Pick a card';
+    var ek = st.g + ':' + st.r; if (st.evCells && st.evCells.length && evAnimKey !== ek) { evAnimKey = ek; o.newFrom = {}; st.evCells.forEach(function (c) { o.newFrom[c[0]] = c[1]; }); boardKey = ''; }
+    drawBoard(st.b, o, JSON.stringify(['p', st.g, st.r, st.b, sel, mi, o.fade, o.areaHL]));
+    $('line').textContent = txt;
+  }
+
+  function playReveal(st, mi) {
+    var L = st.last, n0 = {}, trees0 = treeCount(L.b1), M = mult(st.r), danger = function (t) { return t <= MINTREES + 1 && st.r >= 2; };
+    L.b1.forEach(function (v, i) { var pv = L.pre[i]; var ph = isTree(pv) ? pv.length : 0; if (isTree(v) && v.length > ph) n0[i] = ph; });
+    var tallFall = L.fell.some(function (f) { return f[1] >= 5; }), fallMs = L.fell.length ? 1250 + (tallFall ? 350 : 0) : 0;
+    var injOn = L.inj && L.inj.length, T1 = 1150 + (injOn ? 600 : 0), T2 = T1 + (L.fell.length ? fallMs + 450 : 0);
+    busyUntil = Date.now() + T2 + 300; boardKey = ''; scoreOverride = L.ps; clearTimers();
+    var per = {}, dotsArr = L.pl.filter(function (x) { return kind(x[1]) !== 'i'; }).map(function (x) { var k = per[x[2]] = (per[x[2]] || 0) + 1; return { i: x[2], c: COLORS[x[0]], dx: (k - 1) * 10 - 5 }; });
+    var retie = {}; L.gr.forEach(function (g) { retie[g[0]] = [g[1], g[2]]; });
+    var labels0 = []; (L.barn || []).forEach(function (bn) { labels0.push({ i: bn[0], t: 'Together +' + RULES.barnBonus * M, c: '#a8d870', dy: treeTop(L.b1[bn[0]]) - 16, delay: 500 }); });
+    var o0 = { me: mi, r: st.r, newFrom: n0, dots: dotsArr, retie: retie, labels: labels0, trees: trees0, danger: danger(trees0) };
+    if (injOn) { o0.banner = COLORS[L.inj[0]]; o0.clatter = L.ax; } else o0.axeAt = L.ax;
+    var html0 = boardSvg(L.b1, o0);
+    setSvg(boardEl, html0);
+    renderMeta(st, L.b1);
+    var after = L.b1.slice(); L.fell.forEach(function (f) { after[f[0]] = 's' + st.r; });
+    if (L.fell.length) later(function () {
+      var labels = [];
+      L.fell.forEach(function (f) { var w = f[2], per2 = (L.ev === 'boom' ? RULES.boomPays : CUTX) * M; w.forEach(function (ci, j) { labels.push({ i: f[0], t: (w.length > 1 ? initial(st.pl[ci].n) + ' ' : '') + '+' + per2 * f[1], c: COLORS[ci], dx: (j - (w.length - 1) / 2) * 46, dy: -64, delay: fallMs - 200 }); }); });
+      setSvg(boardEl, boardSvg(after.map(function (v, i) { return L.fell.some(function (f) { return f[0] === i; }) ? L.b1[i] : v; }), { me: mi, r: st.r, fall: L.fell.map(function (f) { return f[0]; }), labels: labels, trees: treeCount(after), danger: danger(treeCount(after)) }));
+      later(function () {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g'); g.innerHTML = L.fell.map(function (f) { return burst(f[0], f[1]); }).join(''); var isle = boardEl.querySelector('.isle'); if (isle) isle.appendChild(g);
+        boardEl.classList.remove('shake'); void boardEl.getBBox; boardEl.classList.add('shake'); setTimeout(function () { boardEl.classList.remove('shake'); }, 500);
+        renderMeta(st, after);
+        if (tallFall) $('line').textContent = 'Timber!';
+      }, fallMs - 150);
+    }, T1);
+    later(function () {
+      scoreOverride = null; chipsKey = '';
+      renderChips(st, mi, st.pl.map(function (p) { return p.s; }), st.pl.map(function (p, i) { return L.cut[i] + L.inc[i]; }), 'gain');
+      var t = treeCount(st.b); setSvg(boardEl, boardSvg(st.b, { me: mi, r: st.r + 1, pop: !!L.ng, trees: t, danger: danger(t) })); renderMeta(st, st.b);
+      $('line').textContent = txt;
+    }, T2);
+    var txt;
+    if (mi < 0) txt = 'Round ' + st.r + '.';
+    else {
+      var lost = L.fell.filter(function (f) { return tiersOf(L.b1[f[0]], mi) && f[2].indexOf(mi) < 0; }), parts = [];
+      var mine = L.pl.filter(function (x) { return x[0] === mi; })[0];
+      var gain = L.cut[mi] + L.inc[mi];
+      txt = lost.length ? (nameOf(st, lost[0][2][0]) + ' cut your tree · ') : '';
+      if (injOn && mine && (kind(mine[1]) === 'a' || kind(mine[1]) === 'c')) txt = 'Injunction! Your axe was wasted · ';
+      else if (injOn && mine && kind(mine[1]) === 'i') txt = L.ax.length ? 'You stopped ' + L.ax.length + (L.ax.length > 1 ? ' axes · ' : ' axe · ') : 'Nobody swung · ';
+      else if (injOn) txt = '';
+      
+      txt += '+' + gain + ' this round';
+    }
+    if (st.co) txt = 'The last trees are falling';
+    later(function () { if (injOn) $('line').textContent = nameOf(st, L.inj[0]) + ' filed an injunction'; else if (!(tallFall && Date.now() > busyUntil - 900)) $('line').textContent = txt; }, 600);
+    if (injOn) later(function () { $('line').textContent = txt; }, 2100);
+  }
+
+  function story(st, mi) {
+    var s = [], tl = st.stat.tall, cuts = st.stat.cut;
+    if (tl.h >= 3 && tl.own.length) s.push(joinNames(st, tl.own, mi) + ' grew the tallest tree (' + tl.h + ' tiers).');
+    var top = Math.max.apply(null, cuts);
+    if (top >= 2) { var lj = []; cuts.forEach(function (c, i) { if (c === top) lj.push(i); }); s.push(joinNames(st, lj, mi) + (lj.length > 1 ? ' each' : '') + ' cut ' + top + ' trees.'); }
+    else if (top === 0) s.push('Nobody swung an axe.');
+    return s.join(' ');
+  }
+
+  function render() {
+    var st = curState();
+    useState(st);
+    if (!st) { if (mode === 'live') renderLobby(); return; }
+    if (!st.pl || !Array.isArray(st.b) || st.b.length !== NC) return;
+    show('s-game');
+    var mi = myIndex(st), meCol = COLORS[mi >= 0 ? mi : 0];
+    document.documentElement.style.setProperty('--me', meCol);
+    var fresh = false;
+    if (st.g !== seenG) { seenG = st.g; animKey = ''; overKey = ''; handKey = ''; chipsKey = ''; boardKey = ''; busyUntil = 0; scoreOverride = null; clearTimers(); $('over').hidden = true; fresh = true; boardEl.classList.remove('pullback'); boardEl.classList.remove('rise'); void boardEl.getBBox; boardEl.classList.add('rise'); setTimeout(function () { boardEl.classList.remove('rise'); }, 1600); }
+    if (st.ph === 'pick' && (sel.g !== st.g || sel.r !== st.r)) { sel = { g: st.g, r: st.r, k: null, s: null }; if (mode === 'live') live.setPresence({ mv: null }); }
+    if (mi >= 0 && sel.k != null && !cardOf(st.pl[mi], sel.k)) sel.k = null;
+    var busy = Date.now() < busyUntil;
+    setSky(st.r, st.ph === 'over' && st.co); grade(st.ph === 'reveal' ? st.r : st.r, st.ph === 'over' && st.co);
+    $('tfill').style.width = (st.ph === 'pick' ? Math.min(100, 100 * (st.left || 0) / PICK_MS) : 0) + '%';
+    if (st.ph === 'pick') {
+      $('over').hidden = true; $('line').hidden = false;
+      if (!busy) {
+        var ex = st.pl.map(function (p, i) { return i === mi ? income(st.b, i, mult(st.r)) : 0; });
+        renderChips(st, mi, st.pl.map(function (p) { return p.s; }), ex, 'rate'); renderMeta(st, st.b); pickView(st, mi); renderHand(st, mi, fresh);
+      }
+    } else if (st.ph === 'reveal') {
+      renderHand(st, mi, false);
+      if (scoreOverride) renderChips(st, mi, scoreOverride);
+      var k = st.g + ':' + st.r;
+      if (animKey !== k) { animKey = k; if (st.last && st.last.r === st.r) playReveal(st, mi); else { drawBoard(st.b, { me: mi, r: st.r, trees: treeCount(st.b) }); renderChips(st, mi, st.pl.map(function (p) { return p.s; })); renderMeta(st, st.b); } }
+    } else if (st.ph === 'over') {
+      if (overKey !== st.g && !busy) {
+        overKey = st.g; boardKey = ''; boardEl.classList.add('pullback'); var tc = treeCount(st.b); drawBoard(st.b, { me: mi, r: st.r + 1, trees: tc, danger: !!st.co }); chipsKey = ''; renderChips(st, mi, st.pl.map(function (p) { return p.s; })); renderMeta(st, st.b);
+        var sc = st.pl.map(function (p) { return p.s; }), top = Math.max.apply(null, sc), ws = [];
+        sc.forEach(function (v, i) { if (v === top) ws.push(i); });
+        if (st.co) { $('overBig').textContent = 'The forest is gone.'; $('overSub').textContent = 'The last trees fell in round ' + (st.coR || st.r) + '. Everyone loses.'; document.documentElement.style.setProperty('--me', '#c9a77f'); }
+        else {
+          $('overBig').textContent = ws.length > 1 ? (ws.indexOf(mi) >= 0 ? 'A tie, and you’re in it.' : 'A tie!') : (ws[0] === mi ? 'You win.' : nameOf(st, ws[0]) + ' wins.');
+          $('overSub').textContent = top + ' points · ' + tc + ' trees still standing';
+          document.documentElement.style.setProperty('--me', COLORS[ws[0]]);
+        }
+        $('overStory').textContent = story(st, mi);
+        var canAgain = mode === 'solo' || live.isHost; $('againBtn').hidden = !canAgain;
+        if (!canAgain) $('overSub').textContent += ' · the host can start another';
+        $('hand').hidden = true; $('line').hidden = true; $('over').hidden = false;
+      }
+    }
+  }
+
+  /* ---------- practice ---------- */
+  function startSolo() {
+    mode = 'solo'; me.id = 'me'; seenG = null;
+    solo = new Engine(function (st) {
+      var mv = {}, now = Date.now();
+      if (sel.g === st.g && sel.r === st.r && sel.k != null && sel.s != null && legal(st, 0, sel.k, sel.s)) mv[0] = { k: sel.k, s: sel.s };
+      for (var i = 1; i < st.pl.length; i++) {
+        var key = st.g + ':' + st.r + ':' + i;
+        if (!botAt[key]) botAt[key] = now + (1500 + Math.random() * 5000) * SPEED;
+        if (now >= botAt[key]) { if (!botMv[key]) botMv[key] = botMove(st, i); if (botMv[key]) mv[i] = botMv[key]; }
+      }
+      return mv;
+    }, function () { });
+    solo.start([{ id: 'me', n: me.name || 'You' }].concat(BOTS.map(function (b, i) { return { id: 'bot' + i, n: b.n }; })));
+    render();
+  }
+
+  /* ---------- live: the host's presence carries the table ---------- */
+  var live = {
+    room: null, isHost: false, sent: '', pres: {}, timer: null, engine: null,
+    setPresence: function (patch) { if (!this.room) return; for (var k in patch) this.pres[k] = patch[k]; this.room.presence(patch).catch(function () {}); },
+    peers: function () { return this.room ? this.room.peers() : []; },
+    hostPeer: function () { var hs = this.peers().filter(function (p) { return p.presence && p.presence.hs; }); hs.sort(function (a, b) { return (a.presence.hs - b.presence.hs) || (a.peer < b.peer ? -1 : 1); }); return hs[0] || null; },
+    myPeer: function () { return this.peers().filter(function (p) { return p.sameTab; })[0] || null; },
+    players: function () { return this.peers().filter(function (p) { return p.kind !== 'agent' && p.presence && p.presence.nm && p.presence.j; }).sort(function (a, b) { return (a.presence.j - b.presence.j) || (a.peer < b.peer ? -1 : 1); }); },
+    becomeHost: function () {
+      var self = this; this.isHost = true; this.setPresence({ hs: Date.now() });
+      this.engine = new Engine(function (st) {
+        var mv = {}, idx = {}; st.pl.forEach(function (p, i) { idx[p.id] = i; });
+        self.peers().forEach(function (p) { var m = p.presence && p.presence.mv, i = idx[p.peer]; if (i != null && validMove(st, m) && legal(st, i, m.k, m.s)) mv[i] = { k: m.k, s: m.s }; });
+        return mv;
+      }, function (st) { var key = JSON.stringify(st); if (key !== self.sent) { self.sent = key; self.setPresence({ st: st }); } });
+      clearInterval(this.timer); this.timer = setInterval(function () { self.engine.tick(); }, 200);
+    },
+    stopHosting: function () { this.isHost = false; clearInterval(this.timer); this.engine = null; this.sent = ''; this.setPresence({ hs: null, st: null }); },
+    start: function () { var pls = this.players().slice(0, MAXP).map(function (p) { return { id: p.peer, n: clean(p.presence.nm) || 'Someone' }; }); if (pls.length < 2 || !this.engine) return; this.engine.start(pls); }
+  };
+  function liveState() {
+    var mp = live.myPeer(); if (mp) me.id = mp.peer;
+    var h = live.hostPeer();
+    if (live.isHost && h && !h.sameTab) live.stopHosting();
+    if (live.isHost && live.engine && live.engine.st) return live.engine.st;
+    return h && h.presence && h.presence.st && h.presence.st.g ? h.presence.st : null;
+  }
+  function renderLobby() {
+    seenG = null; show('s-lobby'); setSky(5, false);
+    var h = live.hostPeer(), pls = live.players(), list = $('lobbyList'); list.innerHTML = '';
+    pls.forEach(function (p, i) {
+      var li = document.createElement('li'), a = document.createElement('span'); a.className = 'av'; a.style.background = i < MAXP ? COLORS[i] : '#ffffff30'; a.textContent = initial(clean(p.presence.nm));
+      var n = document.createElement('span'); n.textContent = clean(p.presence.nm) || 'Someone'; li.appendChild(a); li.appendChild(n);
+      var tg = h && p.peer === h.peer ? 'Host' : p.sameTab ? 'You' : i >= MAXP ? 'Watching' : '';
+      if (tg) { var t = document.createElement('span'); t.className = 't'; t.textContent = tg; li.appendChild(t); }
+      list.appendChild(li);
+    });
+    var iHost = live.isHost && h && h.sameTab;
+    $('hostBtn').hidden = !!h; $('startBtn').hidden = !iHost; $('startBtn').disabled = pls.length < 2;
+    $('lobbyTag').textContent = iHost ? (pls.length < 2 ? 'Waiting for one more player.' : pls.length > MAXP ? 'First eight play, the rest watch.' : 'Deal when everyone’s here.') : h ? clean(h.presence.nm) + ' is hosting. Hang tight.' : 'Someone needs to host.';
+  }
+
+  /* ---------- wiring ---------- */
+  var nameIn = $('name'); nameIn.value = store('gc-name') || ''; me.name = clean(nameIn.value);
+  function nameOk() { $('joinBtn').disabled = !(clean(nameIn.value) && (live.room || WEB.db)); if (WEB.db) $('joinBtn').textContent = cleanCode($('code').value) ? 'Join the table' : 'Start a table'; }
+  nameIn.addEventListener('input', function () { me.name = clean(nameIn.value); store('gc-name', me.name); nameOk(); });
+  $('soloBtn').addEventListener('click', function () { me.name = clean(nameIn.value) || 'You'; startSolo(); });
+  $('joinBtn').addEventListener('click', function () { me.name = clean(nameIn.value); if (me.name && WEB.db && !live.room) { var typed = cleanCode($('code').value); if (typed && typed.length !== 4) { setConn(true, 'Room codes have 4 letters.'); return; } webJoin(typed || newCode()); } if (!me.name || !live.room) return; mode = 'live'; seenG = null; live.setPresence({ nm: me.name, j: Date.now(), mv: null }); render(); });
+  $('hostBtn').addEventListener('click', function () { live.becomeHost(); render(); });
+  $('startBtn').addEventListener('click', function () { live.start(); render(); });
+  function leave() { if (mode === 'live') { if (live.isHost) live.stopHosting(); live.setPresence({ j: null, mv: null }); if (WEB.code) webLeave(); } clearTimers(); solo = null; mode = null; seenG = null; document.body.classList.remove('danger'); setSky(5, false); show('s-join'); }
+  $('leaveBtn').addEventListener('click', leave); $('exitBtn').addEventListener('click', leave); $('quitBtn').addEventListener('click', leave);
+  $('againBtn').addEventListener('click', function () { if (mode === 'solo') startSolo(); else if (live.isHost) { live.start(); render(); } });
+  setInterval(function () { if (mode === 'solo' && solo) solo.tick(); if (mode) render(); }, 120);
+  setSky(5, false);
+
+  /* ---------- website mode: the same table, relayed through Firebase ---------- */
+  var WEB = { db: null, code: null };
+  function cleanCode(v) { return String(v || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4); }
+  function newCode() { var A = 'ABCDEFGHJKLMNPQRSTUVWXYZ', c = ''; for (var k = 0; k < 4; k++) c += A[rnd(A.length)]; return c; }
+  function inviteLink() { return location.origin + location.pathname + '?room=' + WEB.code; }
+  function makeRoom(code) {
+    var id = Math.random().toString(36).slice(2, 10), mine = {}, peers = [], subs = [], connCb = null;
+    var base = WEB.db.ref('rooms/' + code + '/peers'), my = base.child(id), conn = WEB.db.ref('.info/connected');
+    function write() { return my.set({ j: JSON.stringify(mine) }); }
+    function fire() { subs.forEach(function (fn) { try { fn(); } catch (e) {} }); }
+    function onVal(snap) {
+      var v = snap.val() || {};
+      peers = Object.keys(v).filter(function (k) { return k !== id; }).map(function (k) { var pr = {}; try { pr = JSON.parse(v[k].j) || {}; } catch (e) {} return { peer: k, sameTab: false, kind: 'viewer', presence: pr }; });
+      peers.push({ peer: id, sameTab: true, kind: 'viewer', presence: mine }); fire();
+    }
+    function onConn(snap) { var on = !!snap.val(); if (on) { my.onDisconnect().remove(); write(); } if (connCb) connCb(on); }
+    peers.push({ peer: id, sameTab: true, kind: 'viewer', presence: mine });
+    base.on('value', onVal); conn.on('value', onConn);
+    return {
+      presence: function (patch) { mine = Object.assign({}, mine); for (var k in patch) { if (patch[k] === null) delete mine[k]; else mine[k] = patch[k]; } peers.forEach(function (p) { if (p.sameTab) p.presence = mine; }); fire(); return write(); },
+      peers: function () { return peers; },
+      onPeers: function (fn) { subs.push(fn); }, onConnection: function (fn) { connCb = fn; },
+      leave: function () { base.off('value', onVal); conn.off('value', onConn); try { my.onDisconnect().cancel(); } catch (e) {} my.remove(); }
+    };
+  }
+  function webJoin(code) {
+    WEB.code = code; live.room = makeRoom(code);
+    live.room.onConnection(function (c) { setConn(c, c ? 'Connected to table ' + code + '.' : 'Reconnecting…'); });
+    live.room.onPeers(function () { if (mode === 'live') render(); });
+    $('lobbyH').textContent = 'Table ' + code; $('copyLink').hidden = false;
+    try { history.replaceState(null, '', '?room=' + code); } catch (e) {}
+  }
+  function webLeave() { if (live.room && live.room.leave) live.room.leave(); live.room = null; WEB.code = null; $('lobbyH').textContent = 'The table'; $('copyLink').hidden = true; try { history.replaceState(null, '', location.pathname); } catch (e) {} setConn(true, 'Start a table, or enter a friend’s code.'); nameOk(); }
+  function webStart() {
+    function ready() {
+      try { window.firebase.initializeApp(window.FIREBASE_CONFIG); WEB.db = window.firebase.database(); } catch (e) { setConn(false, 'Live play couldn’t start. Practice still works.'); return; }
+      var codeIn = $('code'), m = /[?&]room=([A-Za-z]{4})/.exec(location.search); codeIn.hidden = false; if (m) codeIn.value = m[1].toUpperCase();
+      codeIn.addEventListener('input', function () { codeIn.value = cleanCode(codeIn.value); nameOk(); });
+      $('copyLink').addEventListener('click', function () { var b = $('copyLink'), t = inviteLink(); function done(ok) { b.textContent = ok ? 'Link copied' : t; setTimeout(function () { b.textContent = 'Copy invite link'; }, ok ? 1600 : 8000); } try { navigator.clipboard.writeText(t).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); } });
+      setConn(true, m ? 'Enter your name to join table ' + m[1].toUpperCase() + '.' : 'Start a table, or enter a friend’s code.'); nameOk();
+    }
+    if (window.firebase && window.firebase.database) { ready(); return; }
+    setConn(false, 'Connecting…');
+    var V = 'https://www.gstatic.com/firebasejs/10.12.2/', files = ['firebase-app-compat.js', 'firebase-database-compat.js'];
+    (function next(k) { if (k >= files.length) { ready(); return; } var sc = document.createElement('script'); sc.src = V + files[k]; sc.onload = function () { next(k + 1); }; sc.onerror = function () { setConn(false, 'Live play couldn’t load. Check your connection. Practice still works.'); }; document.head.appendChild(sc); })(0);
+  }
+  function setConn(on, text) { $('connDot').className = on ? 'on' : ''; $('connText').textContent = text; }
+  if (window.claude && typeof window.claude.use === 'function') {
+    window.claude.use('room').then(function (room) {
+      if (!room) { setConn(false, 'Live play isn’t available here. Practice still works.'); return; }
+      live.room = room; nameOk();
+      room.onConnection(function (c) { setConn(c, c ? 'Live table is open.' : 'Reconnecting…'); }, function () { live.room = null; nameOk(); setConn(false, 'Live play isn’t available for this viewer. Practice still works.'); });
+      room.onPeers(function () { if (mode === 'live') render(); }, function () {});
+    }).catch(function () { setConn(false, 'Live play isn’t available here. Practice still works.'); });
+  } else if (window.FIREBASE_CONFIG) webStart();
+  else setConn(false, 'Live play works when opened in Claude. Practice works anywhere.');
+  show('s-join');
+})();
+</script>
+
+
+</body>
+</html>
